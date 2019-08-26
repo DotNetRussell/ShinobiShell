@@ -21,12 +21,16 @@ Use:
 
 Server (Attacking box) 
 `./shinobishell.py -l 4443 -k
+
 `-l` Port server will listen on
+
 `-k` Requesting an encrypted tunnel server
 
 Client (Penetrated box) 
 `./shinobishell.py -c -k ` 
+
 `-c` Connect back to a server
+
 `-k` Try and make an encrytped tunnel
 
 For both server and client, you'll be propmted for a password when using `-k`
