@@ -37,7 +37,7 @@ Client (Penetrated box)
 
 `-k` Try and make an encrytped tunnel
 
-For both server and client, you'll be propmted for a password when using `-k`
+For both server and client, you'll be prompted for a password when using `-k`
 
 For `-c` you will be prompted at run time for the server address
 
