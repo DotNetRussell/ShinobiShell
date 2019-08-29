@@ -48,7 +48,9 @@ Attacking Machine
 
 `./shinobishell.py -a`
 > Shinobi Tunnel Plaintext ~~ Be aware
+
 > Which port to listen on: 1000
+
 > What is the ShinobiServer address:port combination: 127.0.0.1:443
 
 
