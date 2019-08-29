@@ -25,7 +25,7 @@ optional arguments:
 
 `-l` Port server will listen on
 
-`-k` Requesting an encrypted tunnel server
+`-k` Requesting an encrypted tunnel server (optional but if used, required by all connections)
 
 
 ## OPTION 1: Run Shinobi Shell manually on the victim machine
