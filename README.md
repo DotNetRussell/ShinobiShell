@@ -8,6 +8,7 @@ persistance and other pentesting actions easier.
 
 optional arguments:
   -h, --help            show this help message and exit
+  -a, --autoload	Listens for a incoming shell. Then autoloads shinobi shell onto the target
   -t, --ttyCheat        Shows tty shell cheat sheet (need a tty shell for shinobi shell to work)
   -c, --connect         Flag that indicates a reverse shell connection (use this on victim machine)
   -l LISTEN, --listen LISTEN
