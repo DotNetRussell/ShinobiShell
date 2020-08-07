@@ -571,7 +571,7 @@ def listenerHandler(buf,conn,address):
 	elif("ssdownload" in buf):
 		print("executing searchsploit download command")
 		args = buf.split(" ")
-		searchsploitRoot = "/usr/share/exploitdb/"
+		searchsploitRoot = "/usr/share/exploitdb/exploits/"
 		file = open(searchsploitRoot + args[1],'r').read()
 		sendCommand(conn,file)
 	elif("download" in buf):
