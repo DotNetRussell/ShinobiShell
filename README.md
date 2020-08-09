@@ -85,6 +85,7 @@ exfil <file name> -         exfiltrates a file back to your attacking machine vi
 ssdownload <exploit path> - downloads a search sploit exploit from your attacking machine
 download <url> -            does a wget for your file on your attacking machine and then transfers it to you over shinobi tunnel
 linenumdownlods -           linenum.sh to the Shinobi Server and then transfers it back to the client
+suid3num -		    downloads suid3num.py to the Shinobi server and then transfers it back to the client
 
 Loot Chest:
 

